@@ -41,7 +41,7 @@ const todos = (state = [], action) => {
   }
 }
 
-const visibilityFilter = (state = "SET_VISIBILITY_FILTER", action) => {
+const visibilityFilter = (state = "SHOW_ALL", action) => {
   switch (action.type) {
     case "SET_VISIBILITY_FILTER":
       return action.filter;
@@ -53,16 +53,39 @@ const visibilityFilter = (state = "SET_VISIBILITY_FILTER", action) => {
 const todoApp = combineReducers({ todos, visibilityFilter });
 const store = createStore(todoApp);
 
-            // store.dispatch({
-            //   type: "ADD_TODO",
-            //   text: "Text",
-            //   id: nextTodoId++
-            // })
+const getVisibleTodos = (todos, filter) => {
+  switch(filter) {
+    case("SHOW_ALL"):
+      return todos;
+    case("SHOW_COMPLETED"):
+      return todos.filter(t => t.completed);
+    case("SHOW_ACTIVE"):
+      return todos.filter(t => !t.completed);
+  }
+}
+
+const FilterLink = ({filter, children}) => {
+  return (
+    <a href="#" onClick={(e) => {
+      e.preventDefault();
+      store.dispatch({
+        type: 'SET_VISIBILITY_FILTER',
+        filter
+      })
+    }}>
+      {children}
+    </a>
+  )
+}
 
 let nextTodoId = 0;
-
 class TodoApp extends Component {
   render() {
+    const visibleTodos = getVisibleTodos(
+      this.props.todos,
+      this.props.visibilityFilter
+    );
+
     return (
       <div>
         <h1>Add todo here</h1>
@@ -83,7 +106,7 @@ class TodoApp extends Component {
           </button>
         </form>
         <ul>
-          {this.props.todos.map(todo =>
+          {visibleTodos.map(todo =>
             <li key={todo.id}
                 onClick={ () => {
                   store.dispatch({
@@ -100,6 +123,12 @@ class TodoApp extends Component {
             </li>
           )}
         </ul>
+        <p>
+          Show:{' '}
+          <FilterLink filter='SHOW_ALL'>All</FilterLink>{' '}
+          <FilterLink filter="SHOW_ACTIVE">Active</FilterLink>{' '}
+          <FilterLink filter="SHOW_COMPLETED">Completed</FilterLink>
+        </p>
       </div>
     )
   }
@@ -107,10 +136,18 @@ class TodoApp extends Component {
 
 const render = () => {
   ReactDOM.render(
-    <TodoApp todos={store.getState().todos}/>,
+      <TodoApp {...store.getState()}/>,
     document.getElementById('root')
   );
 }
+// seed store
+["Buy Milk", "Pick up kids", "Learn React"].map(item => {
+  store.dispatch({
+    type: "ADD_TODO",
+    id: nextTodoId++,
+    text: item
+  });
+});
 
 store.subscribe(render);
 render();
