@@ -1,0 +1,14 @@
+REDUX notes
+
+Principles:
+  - any state of the app is a js object
+  - tree is only readable, we can not modify it
+  - State mutations are described as a functions that take state and action to dispatch and return new state.
+
+
+
+
+Methods
+  1. createStore and getState
+  2. dispatch
+  3. render
