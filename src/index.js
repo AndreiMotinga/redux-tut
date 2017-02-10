@@ -11,7 +11,7 @@ const todo = (state, action) => {
       return {
         id: action.id,
         text: action.text,
-        completed: false
+        completed: action.completed
       };
     case 'TOGGLE_TODO':
       if(state.id !== action.id) {
@@ -64,7 +64,10 @@ const getVisibleTodos = (todos, filter) => {
   }
 }
 
-const FilterLink = ({filter, children}) => {
+const FilterLink = ({filter, children, currentFilter}) => {
+  if(filter === currentFilter) {
+    return <span>{children}</span>
+  }
   return (
     <a href="#" onClick={(e) => {
       e.preventDefault();
@@ -81,10 +84,8 @@ const FilterLink = ({filter, children}) => {
 let nextTodoId = 0;
 class TodoApp extends Component {
   render() {
-    const visibleTodos = getVisibleTodos(
-      this.props.todos,
-      this.props.visibilityFilter
-    );
+    const { todos, visibilityFilter } = this.props;
+    const visibleTodos = getVisibleTodos(todos, visibilityFilter);
 
     return (
       <div>
@@ -125,9 +126,21 @@ class TodoApp extends Component {
         </ul>
         <p>
           Show:{' '}
-          <FilterLink filter='SHOW_ALL'>All</FilterLink>{' '}
-          <FilterLink filter="SHOW_ACTIVE">Active</FilterLink>{' '}
-          <FilterLink filter="SHOW_COMPLETED">Completed</FilterLink>
+          <FilterLink
+            filter='SHOW_ALL'
+            currentFilter={visibilityFilter}>
+            All
+          </FilterLink>{' '}
+          <FilterLink
+            filter="SHOW_ACTIVE"
+            currentFilter={visibilityFilter}>
+            Active
+          </FilterLink>{' '}
+          <FilterLink
+            filter="SHOW_COMPLETED"
+            currentFilter={visibilityFilter}>
+            Completed
+          </FilterLink>
         </p>
       </div>
     )
@@ -141,11 +154,13 @@ const render = () => {
   );
 }
 // seed store
-["Buy Milk", "Pick up kids", "Learn React"].map(item => {
+["Buy Milk", "Pick up kids", "Learn React", "And Redux"].map(item => {
+  const bool = Math.random() < 0.5 // random boolean
   store.dispatch({
     type: "ADD_TODO",
     id: nextTodoId++,
-    text: item
+    text: item,
+    completed: bool
   });
 });
 
