@@ -10,6 +10,8 @@ import todos from './todos';
 import visibilityFilter from './visibilityFilter';
 import getVisibleTodos from './getVisibleTodos';
 
+import Todo from './components/todo';
+
 const todoApp = combineReducers({ todos, visibilityFilter });
 const store = createStore(todoApp);
 
@@ -30,20 +32,21 @@ const FilterLink = ({filter, children, currentFilter}) => {
   )
 }
 
-const Todo = ({
-  onClick,
-  completed,
-  text
+const TodoList = ({
+  todos,
+  onTodoClick
 }) => {
   return (
-    <li onClick={onClick}
-        style={{
-          textDecoration:
-            completed ?
-              'line-through' : 'none'
-        }}>
-      {text}
-    </li>
+    <ul>
+      {todos.map(todo =>
+      <Todo
+        key={todo.id}
+        completed={todo.completed}
+        text={todo.text}
+        handleClick={() => onTodoClick(todo.id)}
+      />
+      )}
+    </ul>
   )
 }
 
@@ -72,15 +75,15 @@ class TodoApp extends Component {
             Add Todo
           </button>
         </form>
-        <ul>
-          {visibleTodos.map(todo =>
-          <Todo
-            key={todo.id}
-            completed={todo.completed}
-            text={todo.text}
-          />
-          )}
-        </ul>
+        <TodoList
+          todos={visibleTodos}
+          onTodoClick={(id) => {
+            store.dispatch({
+              type: "TOGGLE_TODO",
+              id
+            })
+          }}
+        />
         <p>
           Show:{' '}
           <FilterLink
