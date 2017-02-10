@@ -5,64 +5,13 @@ import ReactDOM from 'react-dom';
 // import deepFreeze from 'deep-freeze';
 import { createStore, combineReducers } from 'redux';
 
-const todo = (state, action) => {
-  switch(action.type) {
-    case 'ADD_TODO':
-      return {
-        id: action.id,
-        text: action.text,
-        completed: action.completed
-      };
-    case 'TOGGLE_TODO':
-      if(state.id !== action.id) {
-        return state;
-      }
-
-      return {
-        ...state,
-        completed: !state.completed
-      }
-    default:
-      return state;
-  }
-};
-
-const todos = (state = [], action) => {
-  switch (action.type) {
-    case 'ADD_TODO':
-      return [
-        ...state,
-        todo(undefined, action)
-      ];
-    case 'TOGGLE_TODO':
-      return state.map(t => todo(t, action));
-    default:
-      return state;
-  }
-}
-
-const visibilityFilter = (state = "SHOW_ALL", action) => {
-  switch (action.type) {
-    case "SET_VISIBILITY_FILTER":
-      return action.filter;
-    default:
-      return state;
-  }
-}
+import todo from './todo';
+import todos from './todos';
+import visibilityFilter from './visibilityFilter';
+import getVisibleTodos from './getVisibleTodos';
 
 const todoApp = combineReducers({ todos, visibilityFilter });
 const store = createStore(todoApp);
-
-const getVisibleTodos = (todos, filter) => {
-  switch(filter) {
-    case("SHOW_ALL"):
-      return todos;
-    case("SHOW_COMPLETED"):
-      return todos.filter(t => t.completed);
-    case("SHOW_ACTIVE"):
-      return todos.filter(t => !t.completed);
-  }
-}
 
 const FilterLink = ({filter, children, currentFilter}) => {
   if(filter === currentFilter) {
@@ -78,6 +27,23 @@ const FilterLink = ({filter, children, currentFilter}) => {
     }}>
       {children}
     </a>
+  )
+}
+
+const Todo = ({
+  onClick,
+  completed,
+  text
+}) => {
+  return (
+    <li onClick={onClick}
+        style={{
+          textDecoration:
+            completed ?
+              'line-through' : 'none'
+        }}>
+      {text}
+    </li>
   )
 }
 
@@ -108,20 +74,11 @@ class TodoApp extends Component {
         </form>
         <ul>
           {visibleTodos.map(todo =>
-            <li key={todo.id}
-                onClick={ () => {
-                  store.dispatch({
-                    type: 'TOGGLE_TODO',
-                    id: todo.id
-                  });
-                }}
-                style={{
-                  textDecoration:
-                    todo.completed ?
-                      'line-through' : 'none'
-                }}>
-              {todo.text}
-            </li>
+          <Todo
+            key={todo.id}
+            completed={todo.completed}
+            text={todo.text}
+          />
           )}
         </ul>
         <p>

@@ -1,0 +1,7 @@
+
+      onClick={ () => {
+        store.dispatch({
+          type: 'TOGGLE_TODO',
+          id: todo.id
+        });
+      }}
